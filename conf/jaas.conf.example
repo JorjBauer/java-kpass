@@ -1,0 +1,18 @@
+/** Login Configuration for the JaasAcn and
+** JaasAzn Applications 
+**/
+
+Client {
+  com.sun.security.auth.module.Krb5LoginModule required;
+};
+
+Server {
+  com.sun.security.auth.module.Krb5LoginModule required
+  client=false
+  useKeyTab=true
+  storeKey=true
+  useTicketCache=false
+  doNotPrompt=true
+  keyTab="/etc/service.keytab"
+  principal="passwordcheck/host.name.example.com";
+};

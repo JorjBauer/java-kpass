@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<project name="build" basedir="." default="delete_dirs">
+  
+  <property name="library.name" value="Kpass" />
+  <property name="library.version" value="0.1" />
+  
+  <property name="bin" value="bin" />
+  <property name="build" value="build" />
+  <property name="lib" value="lib" />
+  <property name="build.classes" value="${build}/classes" />
+  <property name="build.jar" value="${build}/jar" />
+  <property name="jar.name" value="${library.name}" />
+  
+  <path id="classpath">
+    <fileset dir="lib">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+  
+  <target name="create_dirs">
+    <mkdir dir="${build}" />
+    <mkdir dir="${build.classes}" />
+    <mkdir dir="${build.jar}" />
+    <mkdir dir="${bin}" />
+    <mkdir dir="${lib}" />
+  </target>
+
+  <target name="compile" depends="create_dirs">
+    <javac srcdir="src/lib" classpath="${classpath}" includeAntRuntime="no" destdir="${build.classes}" debug="false" deprecation="true" optimize="true">
+    </javac>
+  </target>
+  
+  <path id="build.classpath">
+    <fileset dir="${basedir}">
+      <include name="${lib}/*.jar"/>
+    </fileset>
+  </path>
+  
+  <pathconvert property="manifest.classpath" pathsep=" ">
+    <path refid="build.classpath"/>
+    <mapper>
+      <chainedmapper>
+	<flattenmapper/>
+	<globmapper from="*.jar" to="${lib}/*.jar"/>
+      </chainedmapper>
+    </mapper>
+  </pathconvert>
+
+  <target name="compile-test" depends="jar">
+    <javac srcdir="src/test" classpath="${classpath}" includeAntRuntime="no" destdir="${build.classes}" debug="true" deprecation="true" optimize="false">
+    </javac>
+
+    <antcall target="delete_dirs" />
+
+  </target>
+
+  <target name="test" depends="compile-test">
+    <exec executable="java">
+      <arg value="-classpath" />
+      <arg value=".:${lib}/Kpass.jar:${bin}" />
+      <arg value="-Djava.security.krb5.conf=conf/krb5.conf" />
+      <arg value="-Djava.security.auth.login.config=conf/jaas.conf" />
+      <arg value="Ktest" />
+      <arg value="${user}" />
+      <arg value="${pass}" />
+    </exec>
+
+  </target>
+  
+  <target name="jar" depends="compile">
+    
+    <tstamp>
+      <format property="timestamp" pattern="yyyy/MM/dd HH:mm:ss" />
+    </tstamp>
+    
+    <jar jarfile="${build.jar}/${jar.name}.jar" basedir="${build.classes}">
+      <zipgroupfileset dir="${lib}" includes="*.jar"/>
+      
+      <manifest>
+	<attribute name="Built-By" value="${user.name}"/>
+	<attribute name="Implementation-Title" value="Kpass"/>
+	<attribute name="Implementation-Version" value="${library.version}"/>
+	<attribute name="Build-Timestamp" value="${timestamp}"/>
+	<attribute name="Class-Path" value="${manifest.classpath}"/>
+      </manifest>
+    </jar>
+  </target>
+  
+  <target name="delete_dirs" depends="jar">
+    <copy file="${build.jar}/${jar.name}.jar" todir="${lib}" />
+    <delete dir="${build}" />
+  </target>
+	
+</project>

@@ -1,0 +1,14 @@
+[libdefaults]
+	default_realm = EXAMPLE.COM
+
+[realms]
+	EXAMPLE.COM = {
+		kdc = kerberos1.example.com
+		kdc = kerberos2.example.com
+		kdc = kerberos3.example.com
+		admin_server = kerberos1.example.com
+	}
+
+[domain_realm]
+
+[login]
